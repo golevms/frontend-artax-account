@@ -40,7 +40,7 @@
             <li ><a href="index.html">Dashboard</a></li>
             <li class="active"><a href="refferals.html">Refferals</a></li>
             <li ><a href="#">WhitePaper</a></li>
-            <li ><a href="#">Back to Site</a></li>             
+            <li id="logout"><a href="#">Back to Site</a></li>             
                  
                 
               
@@ -89,11 +89,8 @@
         </div>
       </div>
        <div class="row">
-        <div class="col-md-3 col-sm-6 col-xs-12">
-          
-          
-        </div>
-        <div class="col-md-3 col-sm-6 col-xs-12">
+        
+        <div class="col-md-6 col-sm-6 col-xs-12">
           <div class="info-box box-info">
             <span class="info-box-icon"><img src="images/etherium.png" width="100px"></span>
 
@@ -106,7 +103,7 @@
        
         </div>
     
-        <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="col-md-6 col-sm-6 col-xs-12">
           <div class="info-box box-info">
             <span class="info-box-icon"><img src="images/dollar.png" width="100px"></span>
 
@@ -118,8 +115,7 @@
           </div>
           <!-- /.info-box -->
         </div>
-        <div class="col-md-3 col-sm-6 col-xs-12">
-          </div>
+       
     </div>
     </section>
  
@@ -130,16 +126,16 @@
       <div class="row">
         <!-- Personal Information-->
         <section class="col-lg-6 connectedSortable">
-          <div class="box box-info">
+          <div id="post_account_info" class="box box-info">
             <div class="box-header with-border">
-              <h3 class="box-title">Personal Information - После успешного submit дает доступ ко второму диву справа. Информация становится статичной</h3>
+              <h3 class="box-title">Personal Information </h3>
             </div>
             <div class="box-body">
               <h3>Enter your name</h3>
               <input id="name" class="form-control" type="text" placeholder="Name">
                <h3>Choose your country</h3>
               <div class="form-group">
-                <select id="county" class="form-control select2 select2-hidden-accessible" style="width: 100%;" tabindex="-1" aria-hidden="true">
+                <select id="country" class="form-control select2 select2-hidden-accessible" style="width: 100%;" tabindex="-1" aria-hidden="true">
                   <option value="United States">United States</option> 
                   <option value="United Kingdom">United Kingdom</option> 
                   <option value="Afghanistan">Afghanistan</option> 
@@ -394,18 +390,39 @@
                 </div>
                 
               <div class="box-footer">
-                <button onclick='APP.postAccountINfo()' type="submit" class="btn btn-default pull-right">Submit</button>
+                <button id="app-acc-info-btn" type="submit" class="btn btn-default pull-right">Submit</button>
               </div>
               
             </div>
           </div>
-        </section>
+        
         <!-- End Personal Information-->
+        <!-- Personal Info After Submit-->
+       
+          <div id="get_account_info" class="box box-info">
+            <div class="box-header with-border">
+              <h3 class="box-title">Personal Information </h3>
+            </div>
+            <div class="box-body">
+              <h3>Name</h3>
+              <span id="app-name" class="progress-text">Name</span>
+              <h3>Country</h3>
+              <span id="app-country" class="progress-text">Country</span>
+               <h3>Etherium wallet</h3>
+              <span id="app-wallet" class="progress-text">Wallet</span>
+              <h3>Value to invest</h3>
+              <span id="app-value" class="progress-text">Value</span>
+              <h3>Refferal link</h3>
+              <span id="app-ref" class="progress-text">Refferal</span>
+            </div>
+          </div>
+        </section>
+        <!-- End Personal Info-->
         <!--Smartcontract-->
         <section class="col-lg-6 connectedSortable">
-          <div class="box box-info">
+          <div id="get_smartcontract_info" class="box box-info">
             <div class="box-header with-border">
-              <h3 class="box-title">How to invest - блок доступен только после submit левого блока</h3>
+              <h3 class="box-title">How to invest</h3>
             </div>
             <div class="box-body">
               <p>
@@ -421,7 +438,7 @@
               
               <div class="box-footer">
                 <button type="submit" class="btn btn-default">ETHERSCAN.IO</button>
-                <button type="submit" class="btn btn-default pull-right">COPY ADDRESS - КОПИРУЕТ ДАННЫЙ АДРЕСС</button>
+                <button type="submit" class="btn btn-default pull-right">COPY ADDRESS</button>
               </div>  
             </div>
           </div>
@@ -439,63 +456,187 @@
 <script src="js/app.min.js"></script>
 <script>
   $(document).ready(function(){
-      APP.setPresaleInfo = function(){
-          $("#app-eth").html(APP.presaleINfo.eth + ' ETH');
-          $("#app-usd").html(APP.presaleINfo.usd + ' $');
+
+      APP.currentWizardStep = 1;
+
+      APP.setDivVisibility = function(divId, value){
+          $("#" + divId).css("display",value);
       };
+      
+
+      APP.goToStep = function(step){
+          switch (step) {
+              case 1:
+              APP.getPresaleContract();
+              break;
+              case 2:
+                APP.postPersonalInfo();
+              break;             
+              case 3:
+                  console.log('функция для шага номер 3');
+                  break;
+              default:
+                  step = 0;
+                  console.log('функция для шага номер 0');
+                  break;
+          }
+          APP.currentWizardStep = step;
+          console.log(APP.currentWizardStep);
+      };
+
       APP.setContractInfo = function(){
-          $("#app-smart").html(APP.contractINfo.cont);
+          $("#app-smart").html(APP.contractInfo.cont);
+
+      };
+      APP.contractInfo = {
+          cont: 0.000
+      };
+      APP.getPresaleContract = function(){
+          $.ajax({
+              url: "https://artax.io/api/get_smart_contract",
+              method : 'post',
+              context: document.body,
+              success: function(data) {
+                  if (data.result === 0) {
+                      window.location.replace('http://artax.io/account/login.html');
+                  }
+                  console.log('get_smart_contract');
+                  APP.contractInfo.cont = data.smart_contract;
+                  APP.setDivVisibility("get_smartcontract_info", 'none');
+                  APP.setDivVisibility("get_account_info", 'none');
+                  APP.setDivVisibility("post_account_info", 'block' );                  
+                  APP.setContractInfo();
+              },
+              error: function(){
+                  alert((data['text']))
+                  
+              }
+          });
+      };
+
+      APP.setPresaleInfo = function(){
+          $("#app-eth").html(APP.presaleInfo.eth + ' ETH');
+          $("#app-usd").html(APP.presaleInfo.usd + ' $');
+      };
+
+
+      APP.setPersonalInfo = function(){
+          $("#app-name").html(APP.personalInfo.name);
+          $("#app-country").html(APP.personalInfo.country);
+          $("#app-wallet").html(APP.personalInfo.wallet);
+          $("#app-value").html(APP.personalInfo.value);
+          $("#app-ref").html(APP.personalInfo.ref);
           
       };
-      APP.presaleINfo = {
+
+      APP.presaleInfo = {
            eth: 0.000,
-           usd: 0.000,
-           
+           usd: 0.000
       };
-      APP.contractINfo = {
-         cont: 0.000
+
+
+      
+      APP.personalInfo = {
+          name: 0.000,
+          country : 0.000,
+          wallet: 0.000,
+          value: 0.000,
+          ref: 0.000
+       
       };
+
       APP.getPresaleInfo = function(){
           $.ajax({
               url: "https://artax.io/api/presale_info",
               method : 'post',
               context: document.body
           }).done(function(data) {
-              //console.log(JSON.parse(data));
-              data = JSON.parse(data);
-              APP.presaleINfo.eth = data.eth;
-              APP.presaleINfo.usd = data.usd;
+              APP.presaleInfo.eth = data.eth;
+              APP.presaleInfo.usd = data.usd;
               APP.setPresaleInfo();
           });
       };
-      APP.getPresaleContract = function(){
+
+      
+
+      APP.postPersonalInfo = function(){
           $.ajax({
-              url: "https://artax.io/api/get_smart_contract",
+              url: "https://artax.io/api/get_account_info",
               method : 'post',
               context: document.body
           }).done(function(data) {
-              //console.log(JSON.parse(data));
-              data = JSON.parse(data);
-              APP.contractINfo.cont = data.smart_contract;
-              APP.setContractInfo();
+              if (data.result === 1) {
+                  APP.setDivVisibility("get_smartcontract_info", 'block');
+                  APP.setDivVisibility("get_account_info", 'block');
+                  APP.setDivVisibility("post_account_info", 'none' );      
+                  }
+              if (data.result === 0) {
+                  APP.setDivVisibility("get_smartcontract_info", 'none');
+                  APP.setDivVisibility("get_account_info", 'none');
+                  APP.setDivVisibility("post_account_info", 'block' );      
+                  }
+              APP.personalInfo.name = data.name;
+              APP.personalInfo.country = data.country;
+              APP.personalInfo.wallet = data.address;
+              APP.personalInfo.value = data.value;
+              APP.personalInfo.ref = data.ref_link;
+              APP.setPersonalInfo();
           });
       };
-      APP.postAccountINfo = function(){
+
+      APP.postAccountInfo = function(){
           $.ajax({
               url: "https://artax.io/api/post_account_info",
               method : 'post',
-              data: JSON.stringify({"name": $('#name').val(),"address": $('#adress').val(), "country": $('#country').val(),"value": $('#value').val(), "agree": $('#agree').val()}),
-              success: function(data) {alert((data['text']))},
-              error: function() {},
+              data: JSON.stringify({                   
+                   "address": $("#adress").val(),
+                   "name": $("#name").val(),
+                   "country": $("#country option:selected").val(),
+                   "value": $("#value").val(),
+                   "agree": (($("#agree").prop('checked')) ? 1 : 0)
+              }),
+              success: function(data) {
+                  console.log(data);
+                  alert((data['text']));
+                  APP.setDivVisibility("get_smartcontract_info", 'block');
+                  APP.setDivVisibility("get_account_info", 'block');
+                  APP.setDivVisibility("post_account_info", 'none' );
+              },
+              error: function() {
+
+              }
+          });
+      };
+
+      APP.logoutAccount = function(){
+          $.ajax({
+            url: "https://artax.io/api/logout",
+            method : 'post',
+            data: JSON.stringify({}),
+            success: function(data) {
+              window.location.replace('http://artax.io/account/login.html')},
+            error: function() {
+
+          }
           });
       };
      
-     
       APP.init = function(){
-          this.getPresaleInfo();
-          this.getPresaleContract();
-          
-                };
+          this.goToStep(1);
+          this.getPresaleInfo();          
+          this.postPersonalInfo();
+          $(document).on('click', '#app-acc-info-btn', function(event){
+              event.preventDefault();
+              APP.postAccountInfo();
+              return false;
+          });
+          $(document).on('click', '#logout', function(event){
+              event.preventDefault();
+              APP.logoutAccount();
+              return false;
+          });
+      };
+
       APP.init();
   });
 </script>
